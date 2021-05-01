@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
-var ObjectId = require('mongodb').ObjectID;
+const ObjectId = require('mongodb').ObjectID;
 
 const uri = "mongodb+srv://rabeya:rabeya123@raufuprezensinc.hztjo.mongodb.net/rabeya-food-fitness?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -23,6 +23,7 @@ client.connect(err => {
   const foodsCollection = client.db("rabeya-food-fitness").collection("foods");
   const reviewsCollection = client.db("rabeya-food-fitness").collection("reviews");
   const adminsCollection = client.db("rabeya-food-fitness").collection("admins");
+  const ordersCollection = client.db("rabeya-food-fitness").collection("orders");
 
   app.post("/addFoods", (req, res) => {
     const food = req.body;
@@ -76,9 +77,24 @@ client.connect(err => {
       })
   })
   app.get('/foods/:id', (req, res) => {
-    foodsCollection.find({ _id: ObjectId(req.params, id) })
+    foodsCollection.find({ _id: ObjectId(req.params.id) })
       .toArray((err, documents) => {
         res.send(documents[0])
+      })
+  })
+
+  app.post("/addOrders", (req, res) => {
+    const review = req.body;
+    ordersCollection.insertOne(review)
+      .then(result => {
+        res.redirect('/')
+      })
+  })
+
+  app.get('/orders', (req, res) => {
+    ordersCollection.find({})
+      .toArray((err, documents) => {
+        res.send(documents);
       })
   })
 
