@@ -1,13 +1,21 @@
 const express = require('express');
+const app = express()
+const server = require('http').createServer(app);
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require('mongodb').ObjectID;
-
 const uri = "mongodb+srv://rabeya:rabeya123@raufuprezensinc.hztjo.mongodb.net/rabeya-food-fitness?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-const app = express()
+
+
+const io = require('socket.io')(server, {
+  cors: {
+      origin: '*',
+      methods: ['GET,POST']
+  }
+});
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -18,6 +26,19 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 })
 
+io.on('connection', (socket) => {
+  socket.emit('me', socket.id);
+
+  socket.on('disconnect', () => {
+      socket.broadcast.emit('callEnded')
+  })
+  socket.on('callUser', ({ userToCall, signalData, from, name }) => {
+      io.to(userToCall).emit('callUser', { signal: signalData, from, name });
+  })
+  socket.on('answerCall', (data) => {
+      io.to(data.to).emit('callAccepted', data.signal)
+  })
+})
 
 client.connect(err => {
   const foodsCollection = client.db("rabeya-food-fitness").collection("foods");
