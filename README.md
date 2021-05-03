@@ -67,3 +67,7 @@
       <li><b>Database</b>: MongoDB</li>
       <li><b>Authentication</b>: Firebase</li>
 </ul>
+
+## Live Server Link
+
+https://rabeya-food-fitness.herokuapp.com/
